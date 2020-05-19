@@ -30,8 +30,8 @@ public class DateService extends org.apache.commons.lang3.time.DateUtils{
      * @Param []
      * @return java.lang.String
      **/
-    public static String currentFormattedMilliseconds() {
-        return new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss").format(new Date());
+    public static String currentFormattedMilliseconds(String format) {
+        return new SimpleDateFormat(format).format(new Date());
     }
 
     /*
