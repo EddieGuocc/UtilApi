@@ -21,8 +21,11 @@ import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -154,6 +157,89 @@ public class BootwithutilsApplicationTests {
         System.out.println("PhantomReference After GC:" + phantomReference);
     }
 
+    class ItemThread implements Runnable{
+        private Random random = new Random();
+        ConcurrentHashMap<String, List<Integer>> map;
+
+        public ItemThread(ConcurrentHashMap<String, List<Integer>> map) {
+            this.map = map;
+        }
+
+        @Override
+        public void run() {
+            for(int i = 0; i < 5; i++){
+                execute();
+            }
+        }
+
+        public void execute(){
+            try {
+                String thread = Thread.currentThread().getName();
+                List<Integer> list = new ArrayList<>();
+                //按照线程名 寻找map的key
+                if (map.get(thread) == null || map.get(thread).isEmpty()){
+                    list.add(random.nextInt(100));
+                    map.put(thread, list);
+                }else {
+                    list = map.get(thread);
+                    list.add(random.nextInt(100));
+                }
+
+                System.out.println("Thread: "+ thread +" added "+ list.get(list.size()-1));
+                Thread.sleep(1000);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Test
+    public void ThreadPool_FixedThreadPool(){
+        ConcurrentHashMap<String, List<Integer>> map = new ConcurrentHashMap<>();
+        //线程池大小
+        Integer poolSize = 3;
+        //线程个数
+        Integer threadNum = 3;
+        //创建一个固定的线程池，并规定最大并发数，超过的线程会等待
+        ExecutorService executorService = Executors.newFixedThreadPool(poolSize);
+        System.out.println("Starting ...");
+        for (int i = 0; i < threadNum; i++) {
+            //按照线程个数 提交入线程池
+            executorService.submit(new ItemThread(map));
+        }
+        //等待各个子线程关闭后关闭线程池
+        executorService.shutdown();
+        //executorService.shutdownNow(); 不等待 直接关闭
+        try {
+            //一直等待 直到线程池状态为Termination或者达到指定时间 此处是1天
+            executorService.awaitTermination(1, TimeUnit.DAYS);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+        for(Map.Entry<String,List<Integer>> entry : map.entrySet()){
+            //输出
+            System.out.println("\nThread "+entry.getKey());
+            System.out.println("Value ");
+            for(Integer integer : entry.getValue()){
+                System.out.print(integer+"\t");
+            }
+        }
+
+        /* 【RESULT】
+          Thread pool-2-thread-2
+          Value
+          23	52	76	19	34
+          Thread pool-2-thread-1
+          Value
+          97	98	7	87	28
+          Thread pool-2-thread-3
+          Value
+          38	9	73	67	18
+         **/
+    }
+
 
 
 }
+
+
