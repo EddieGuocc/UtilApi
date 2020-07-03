@@ -20,4 +20,10 @@ public class Person {
 
     private String relationWithOwner;
 
+    public Person(String name, char gender, Integer age, String relationWithOwner) {
+        this.name = name;
+        this.gender = gender;
+        this.age = age;
+        this.relationWithOwner = relationWithOwner;
+    }
 }

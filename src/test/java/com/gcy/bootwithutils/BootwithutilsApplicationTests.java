@@ -1,16 +1,9 @@
 package com.gcy.bootwithutils;
 
-import com.gcy.bootwithutils.service.bean.BeanService;
-import com.gcy.bootwithutils.service.date.DateService;
-import com.gcy.bootwithutils.service.json.JsonService;
-import com.gcy.bootwithutils.service.number.NumberService;
-import com.gcy.bootwithutils.service.string.StringService;
-import com.gcy.bootwithutils.vo.House;
 import com.gcy.bootwithutils.vo.Person;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -18,19 +11,15 @@ import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
-import java.math.BigDecimal;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Slf4j
 public class BootwithutilsApplicationTests {
+
+    private static BlockingQueue<Integer> queue = new ArrayBlockingQueue<Integer>(10);
 
     @Test
     public void BubbleSort(){
@@ -236,6 +225,81 @@ public class BootwithutilsApplicationTests {
           Value
           38	9	73	67	18
          **/
+    }
+
+    /*
+     * @Author gcy
+     * @Description 并发阻塞队列 BlockingQueue 生产者（入队列操作）
+     * @Date 19:00 2020/7/3
+     * @Param []
+     * @return void
+     **/
+    private static void producer() throws InterruptedException {
+        Random random = new Random();
+        Thread.sleep(5000);
+        while (true) {
+            int temp = random.nextInt(100);
+            //使用offer方法不会阻塞当前线程，所以依旧能看到线程isAlive
+            Thread t = Thread.currentThread();
+            System.out.println(t.isAlive());
+            if(queue.offer(temp,1000,TimeUnit.MILLISECONDS)){
+                System.out.println("producer add "+ temp);
+            }else{
+                System.out.println("queue is full waiting for consumer");
+            }
+
+            //使用put方法会阻塞当前线程 只有添入队列的时候线程isAlive
+            queue.put(temp);
+            System.out.println("producer add "+ temp);
+
+        }
+    }
+
+    /*
+     * @Author gcy
+     * @Description 并发阻塞队列 BlockingQueue 消费者（出队列操作）
+     * @Date 19:03 2020/7/3
+     * @Param []
+     * @return void
+     **/
+    private static void consumer() throws InterruptedException {
+        Random random = new Random();
+        List<Integer> res = new ArrayList<Integer>();
+        while (true) {
+            Thread.sleep(1000);
+            //使用take方法取出 如果队列中没有元素 则阻塞线程
+            Integer value_take = queue.take();
+            //使用poll方法取出 没有元素 超时返回null
+            Integer value_poll = queue.poll(1000,TimeUnit.MILLISECONDS);
+            //批量取出
+            queue.drainTo(res);
+            System.out.println("Taken value: " + value_take + "; Queue size is: " + queue.size());
+            res.clear();
+        }
+    }
+
+    @Test
+    public void BlockingQueue_Example() throws InterruptedException {
+        Thread t1 = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    producer();
+                } catch (InterruptedException ignored) {}
+            }
+        });
+
+        Thread t2 = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    consumer();
+                } catch (InterruptedException ignored) {}
+            }
+        });
+        t1.start();
+        t2.start();
+        //无限循环 60秒后自动终止
+        Thread.sleep(60000);
+        System.exit(0);
     }
 
 
