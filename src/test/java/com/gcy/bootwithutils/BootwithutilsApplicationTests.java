@@ -19,7 +19,16 @@ import java.util.concurrent.*;
 @Slf4j
 public class BootwithutilsApplicationTests {
 
+    /*
+     * 两种常用的阻塞队列 基本用法类似 但是底层数据结构
+     * ArrayBlockingQueue 是数组 只有一个锁 本质上不是并发进行入队出队操作
+     * LinkedBlockingQueue 是链表 两个所 一个控制入队 一个控制出队 并发进行操作
+     * 此队列声明时要指定容量，否则队列容量就是Integer.MAX_VALUE 在入队速率大于出队速率时容易耗尽内存
+     * 出/入并发高 使用ArrayBlockingQueue
+     * 均并发高 使用LinkedBlockingQueue
+     */
     private static BlockingQueue<Integer> queue = new ArrayBlockingQueue<Integer>(10);
+    private static BlockingQueue<Integer> linked_queue = new LinkedBlockingQueue<>(10);
 
     @Test
     public void BubbleSort(){
@@ -300,6 +309,59 @@ public class BootwithutilsApplicationTests {
         //无限循环 60秒后自动终止
         Thread.sleep(60000);
         System.exit(0);
+    }
+
+    //synchronized (this) 指获取此对象的锁 进入同步代码块 其他访问需要等到锁释放
+    public void objectLock() throws InterruptedException {
+        synchronized (this) {
+            for(int i = 0; i <= 4 ; i++){
+                System.out.println(Thread.currentThread().getName()+"\t"+i);
+            }
+        }
+    }
+
+    //synchronized (class) 指获取此类的锁 由于jvm只有一个类 所以类锁只有一个
+    public void classLock() throws InterruptedException {
+        synchronized (BootwithutilsApplicationTests.class) {
+            for(int i = 0; i <= 4 ; i++){
+                System.out.println(Thread.currentThread().getName()+"\t"+i);
+            }
+        }
+    }
+
+    /*
+     * 两个对象锁 ———— 先启动的线程获得执行权 执行完毕后另外线程获得锁再执行
+     * 两个类锁   ———— 同上
+     * 一个对象锁 ———— 一个类锁 互不影响 两个线程执行结果交替出现
+     * 使用【synchronized】修饰的方法获取的锁也是对象锁
+     */
+    @Test
+    public void DifferentLocks(){
+        final BootwithutilsApplicationTests tests = new BootwithutilsApplicationTests();
+        Thread thread_1 = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    tests.classLock();
+                    //tests.objectLock();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        },"t1");
+
+        Thread thread_2 = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    tests.classLock();
+                    //tests.objectLock();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        },"t2");
+
+        thread_1.start();
+        thread_2.start();
     }
 
 
