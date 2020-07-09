@@ -13,6 +13,9 @@ import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -29,6 +32,7 @@ public class BootwithutilsApplicationTests {
      */
     private static BlockingQueue<Integer> queue = new ArrayBlockingQueue<Integer>(10);
     private static BlockingQueue<Integer> linked_queue = new LinkedBlockingQueue<>(10);
+
 
     @Test
     public void BubbleSort(){
@@ -341,8 +345,9 @@ public class BootwithutilsApplicationTests {
         Thread thread_1 = new Thread(new Runnable() {
             public void run() {
                 try {
-                    tests.classLock();
-                    //tests.objectLock();
+                    //tests.classLock(); 1. 类锁
+                    //tests.objectLock(); 2. 对象锁
+                    tests.usingLockSimulateSync_1(); //3. 自定义锁
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -352,8 +357,9 @@ public class BootwithutilsApplicationTests {
         Thread thread_2 = new Thread(new Runnable() {
             public void run() {
                 try {
-                    tests.classLock();
+                    //tests.classLock();
                     //tests.objectLock();
+                    tests.usingLockSimulateSync_2();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -362,6 +368,55 @@ public class BootwithutilsApplicationTests {
 
         thread_1.start();
         thread_2.start();
+
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private Lock lock = new ReentrantLock();
+    private Condition cond = lock.newCondition();
+
+    /*
+     * 使用锁 来模仿synchronized同步代码块1
+     */
+    public void usingLockSimulateSync_1() throws InterruptedException {
+        lock.lock();
+        System.out.println("Simulation Thread 1 Wait...");
+        cond.await(); //类似于object.wait() 阻塞当前线程
+        System.out.println("Simulation Thread 1 Woke Up...");
+        try {
+            for(int i = 0; i <= 4 ; i++){
+                System.out.println(Thread.currentThread().getName()+"\t"+i);
+            }
+        }finally {
+            lock.unlock();//释放锁
+            System.out.println("Simulation Thread 1 release the lock");
+        }
+
+    }
+
+    /*
+     * 使用锁 来模仿synchronized同步代码块2
+     */
+    public void usingLockSimulateSync_2() throws InterruptedException {
+        Thread.sleep(1000);
+        lock.lock();
+        System.out.println("Press the return key!");
+        System.out.println("Got return key! Simulation Thread 2 is calling Thread 1 to wake up...");
+        cond.signal();//类似于object.notify() 唤醒等待的某个线程
+        try {
+            for(int i = 0; i <= 4 ; i++){
+                System.out.println(Thread.currentThread().getName()+"\t"+i);
+            }
+        }finally {
+            lock.unlock();
+            System.out.println("Simulation Thread 2 release the lock");
+        }
+
     }
 
 
