@@ -419,6 +419,66 @@ public class BootwithutilsApplicationTests {
 
     }
 
+    @Test
+    public void CallableImplExample() throws InterruptedException{
+        ArrayList<Integer> list = new ArrayList<Integer>();
+        //newCachedThreadPool灵活分配线程 线程复用 不够用时才会新建
+        ExecutorService executor = Executors.newCachedThreadPool();
+        //接受call返回参数
+        Future<Integer> future;
+
+        for (int i = 1; i < 10; i++) {
+            future = executor.submit(new MyCallable(i));
+            //使用isDone方法来判定异步线程是否返回结果
+            System.out.println("call method is done? " + future.isDone());
+            //future.cancel(true); 可根据实际情况 取消执行
+            try {
+                //获得返回值之前会一直等待
+                list.add(future.get());
+            } catch (ExecutionException ex) {
+                System.out.println(ex.getMessage());
+            }
+        }
+
+        executor.shutdown();
+        executor.awaitTermination(1, TimeUnit.DAYS);
+
+        for (int i = 0; i < list.size(); i++) {
+            System.out.println("List Values " + i + " Value: " + list.get(i));
+
+        }
+    }
+
+    /*
+     * 相较于runnable接口实现方法 run
+     * callable接口的实现方法 call可以添加返回参数 也可以抛出异常
+     */
+    class MyCallable implements Callable<Integer> {
+
+        int value;
+
+        public MyCallable(int i) {
+            this.value = i;
+        }
+
+        @Override
+        public Integer call() throws Exception {
+            int sum = 0;
+            System.out.println("call method sleep 1 second");
+            Thread.sleep(1000);
+            for (int i = 0; i < value; i++) {
+                sum += i;
+            }
+            //异常处理
+            if (sum >= 20) {
+                throw new Exception("sum is bigger than 20");
+            }
+            System.out.println("Sum in Callable.Call() " + sum + "Thread is " + Thread.currentThread().getName());
+            //返回参数
+            return sum;
+        }
+    }
+
 
 
 }
