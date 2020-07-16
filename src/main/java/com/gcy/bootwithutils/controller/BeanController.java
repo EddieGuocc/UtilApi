@@ -1,14 +1,13 @@
 package com.gcy.bootwithutils.controller;
 
 
-import com.gcy.bootwithutils.common.Result;
+import com.gcy.bootwithutils.common.constants.Result;
 import com.gcy.bootwithutils.service.bean.BeanService;
 import com.gcy.bootwithutils.vo.House;
 import com.gcy.bootwithutils.vo.Person;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;

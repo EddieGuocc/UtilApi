@@ -17,6 +17,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Slf4j
@@ -478,9 +479,6 @@ public class BootwithutilsApplicationTests {
             return sum;
         }
     }
-
-
-
 }
 
 
