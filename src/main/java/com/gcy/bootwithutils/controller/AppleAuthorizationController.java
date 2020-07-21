@@ -3,7 +3,8 @@ package com.gcy.bootwithutils.controller;
 import com.gcy.bootwithutils.common.constants.Result;
 import com.gcy.bootwithutils.common.dto.AppleAuthKey;
 import com.gcy.bootwithutils.common.dto.AppleAuthKeys;
-import com.gcy.bootwithutils.common.dto.ResolvedAppleToken;
+import com.gcy.bootwithutils.common.dto.ResolvedAppleTokenAlgInfo;
+import com.gcy.bootwithutils.common.dto.ResolvedAppleTokenAuthInfo;
 import com.gcy.bootwithutils.controller.base.BaseController;
 import com.gcy.bootwithutils.httpclient.HttpResult;
 import com.gcy.bootwithutils.service.json.JsonService;
@@ -63,7 +64,7 @@ public class AppleAuthorizationController extends BaseController {
         if (hr.getCode() == 200){
             keysList = JsonService.jsonToObject(hr.getBody(), AppleAuthKeys.class);
             if (keysList != null && !keysList.getKeys().isEmpty()){
-                ResolvedAppleToken token = verify(identityToken, keysList);
+                ResolvedAppleTokenAuthInfo token = verify(identityToken, keysList);
                 if (token != null){
                     // TODO 此处接入业务代码
                     return Result.success(token);
@@ -82,11 +83,11 @@ public class AppleAuthorizationController extends BaseController {
      *@Author Eddie
      *@Date 2020/07/16 14:41
      */
-    public static ResolvedAppleToken verify(String identityToken, AppleAuthKeys keys) throws Exception {
+    public static ResolvedAppleTokenAuthInfo verify(String identityToken, AppleAuthKeys keys) throws Exception {
         if(keys == null){
             return null;
         }
-        ResolvedAppleToken res;
+        ResolvedAppleTokenAuthInfo res;
         //一般情况Apple会返回两组key 第一个不好用时候第二个好用 所以遍历进行验证
         for(AppleAuthKey key: keys.getKeys()){
             res = verifyKeyAndToken(identityToken, key);
@@ -104,32 +105,38 @@ public class AppleAuthorizationController extends BaseController {
      *@Author Eddie
      *@Date 2020/07/16 14:42
      */
-    public static ResolvedAppleToken verifyKeyAndToken(String identityToken, AppleAuthKey publicKey) throws Exception {
+    public static ResolvedAppleTokenAuthInfo verifyKeyAndToken(String identityToken, AppleAuthKey publicKey) throws Exception {
         String n = publicKey.getN();
         String e = publicKey.getE();
+
+        //解析identityToken
+        ResolvedAppleTokenAuthInfo resolvedAppleTokenAuthInfo = resolveIdentityToken(identityToken, publicKey.getKid());
+
+        if(resolvedAppleTokenAuthInfo == null){
+            return null;
+        }
+
         //解析公钥
         PublicKey pubKey = getPublicKey(n,e);
         JwtParser jwtParser = Jwts.parser().setSigningKey(pubKey);
         jwtParser.requireIssuer("https://appleid.apple.com");
-        //解析identityToken
-        ResolvedAppleToken resolvedAppleToken = resolveIdentityToken(identityToken);
         //APP ID
-        jwtParser.requireAudience(resolvedAppleToken.getAud());
+        jwtParser.requireAudience(resolvedAppleTokenAuthInfo.getAud());
         //USER ID
-        jwtParser.requireSubject(resolvedAppleToken.getSub());
+        jwtParser.requireSubject(resolvedAppleTokenAuthInfo.getSub());
 
         try {
             //公钥验证
             Jws<Claims> claim = jwtParser.parseClaimsJws(identityToken);
-            if (claim != null && claim.getBody().containsKey("auth_time") &&
-                    "true".equals(claim.getBody().get("email_verified",String.class))) {
-                return resolvedAppleToken;
+            if (claim != null && claim.getBody().containsKey("auth_time")) {
+                return resolvedAppleTokenAuthInfo;
             }
             return null;
         } catch (Exception e2) {
             //解析不成功会抛出异常 此处为了返回结果特殊处理
-            resolvedAppleToken.setEmail("758418981@qq.com");
-            return resolvedAppleToken;
+            //resolvedAppleTokenAuthInfo.setEmail("758418981@qq.com");
+            //return resolvedAppleTokenAuthInfo;
+            return null;
         }
     }
 
@@ -140,21 +147,29 @@ public class AppleAuthorizationController extends BaseController {
      *@Author Eddie
      *@Date 2020/07/16 11:24
      */
-    public static ResolvedAppleToken resolveIdentityToken(String identityToken){
+    public static ResolvedAppleTokenAuthInfo resolveIdentityToken(String identityToken, String kid){
         String[] arr = identityToken.split("\\.");
         /* token格式为三段式，以[.]分割base64解码后数据结构如下
          * {"kid":"XXXXX","alg":"RS256"}
          * {"iss":"https://appleid.apple.com","aud":"com.XXXX.XXXX","exp":1565668086,"iat":1565667486,"sub":"xxxx.xxxxx.xxxxx","c_hash":"xxxxxxxx","auth_time":1565667486}
          * {�]��")a+��L��b�š��'^E�#�C��k�$Q��u�M=�o} 第三部分乱码
          */
-        for(int i = 0; i < arr.length; i++){
-            String temp = new String (Base64.decodeBase64(arr[i]));
-            System.out.println(temp);
+        if(arr.length == 3){
+            Base64 base64 = new Base64();
+            String alg = new String(base64.decodeBase64(arr[0]));
+            String auth = new String (base64.decodeBase64(arr[1]));
+            String algStr = alg.substring(0, alg.indexOf("}")+1);
+            String authStr = auth.substring(0, auth.indexOf("}")+1);
+            ResolvedAppleTokenAlgInfo algInfo = JsonService.jsonToObject(algStr, ResolvedAppleTokenAlgInfo.class);
+            System.out.println(algInfo.toString());
+            ResolvedAppleTokenAuthInfo authInfo = JsonService.jsonToObject(authStr, ResolvedAppleTokenAuthInfo.class);
+            System.out.println(authInfo.toString());
+            if(authInfo != null && kid.equals(algInfo.getKid())){
+                return authInfo;
+            }
+            System.out.println("apple login --------> resolveIdentityToken kid is " + algInfo.getKid()+ " mismatch with public key's kid " + kid + ", try using next key");
         }
-        String decode = new String (Base64.decodeBase64(arr[1]));
-        String substring = decode.substring(0, decode.indexOf("}")+1);
-        ResolvedAppleToken res = JsonService.jsonToObject(substring, ResolvedAppleToken.class);
-        return res;
+        return null;
     }
 
     /*

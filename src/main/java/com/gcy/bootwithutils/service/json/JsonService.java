@@ -62,6 +62,7 @@ public class JsonService {
             return t;
         } catch (Exception e) {
             // ignore
+            e.printStackTrace();
         }
         return null;
     }

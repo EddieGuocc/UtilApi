@@ -6,7 +6,7 @@ package com.gcy.bootwithutils.common.dto;
  * @Author Eddie
  * @Date 2020/07/16 09:50
  */
-public class ResolvedAppleToken {
+public class ResolvedAppleTokenAuthInfo {
 
     //APP ID
     private String aud;
@@ -26,6 +26,8 @@ public class ResolvedAppleToken {
     private Integer iat;
     //email地址
     private String email;
+
+    private String nonce_supported;
 
     public String getAud() {
         return aud;
@@ -97,6 +99,14 @@ public class ResolvedAppleToken {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getNonce_supported() {
+        return nonce_supported;
+    }
+
+    public void setNonce_supported(String nonce_supported) {
+        this.nonce_supported = nonce_supported;
     }
 
     @Override
