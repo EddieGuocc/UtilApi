@@ -161,13 +161,13 @@ public class AppleAuthorizationController extends BaseController {
             String algStr = alg.substring(0, alg.indexOf("}")+1);
             String authStr = auth.substring(0, auth.indexOf("}")+1);
             ResolvedAppleTokenAlgInfo algInfo = JsonService.jsonToObject(algStr, ResolvedAppleTokenAlgInfo.class);
-            System.out.println(algInfo.toString());
+            log.info(algInfo.toString());
             ResolvedAppleTokenAuthInfo authInfo = JsonService.jsonToObject(authStr, ResolvedAppleTokenAuthInfo.class);
-            System.out.println(authInfo.toString());
+            log.info(authInfo.toString());
             if(authInfo != null && kid.equals(algInfo.getKid())){
                 return authInfo;
             }
-            System.out.println("apple login --------> resolveIdentityToken kid is " + algInfo.getKid()+ " mismatch with public key's kid " + kid + ", try using next key");
+            log.info("apple login --------> resolveIdentityToken kid is " + algInfo.getKid()+ " mismatch with public key's kid " + kid + ", try using next key");
         }
         return null;
     }
