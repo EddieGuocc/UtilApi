@@ -1,7 +1,11 @@
 package com.gcy.bootwithutils.controller;
 
 
+import com.gcy.bootwithutils.common.annotation.RedisLock;
+import com.gcy.bootwithutils.common.constants.RedisLockTypeEnum;
 import com.gcy.bootwithutils.common.constants.Result;
+import com.gcy.bootwithutils.common.constants.ResultCode;
+import com.gcy.bootwithutils.common.exception.Exception400;
 import com.gcy.bootwithutils.common.exception.Exception401;
 import com.gcy.bootwithutils.controller.base.BaseController;
 import com.gcy.bootwithutils.service.bean.BeanService;
@@ -53,6 +57,18 @@ public class BeanController extends BaseController {
     @ResponseBody
     public Result<String> testSimpleCors(@RequestParam("param") String param){
         return Result.success(param);
+    }
+
+    @GetMapping("/lock")
+    @RedisLock(typeEnum = RedisLockTypeEnum.BUSINESS_A, lockTime = 12)
+    public Result<String> get(@RequestParam("id") String id) {
+        System.out.println("controller in " + id);
+        try {
+            Thread.sleep(40000);
+        } catch (InterruptedException e) {
+            throw new Exception400(ResultCode.UNCONNECTION);
+        }
+        return Result.success("success");
     }
 
 }
