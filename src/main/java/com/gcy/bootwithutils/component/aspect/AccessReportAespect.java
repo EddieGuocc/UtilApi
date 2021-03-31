@@ -93,7 +93,7 @@ public class AccessReportAespect {
         AccessReport accessReport = new AccessReport();
         Object result = joinPoint.proceed();
 
-        //获取切点方法签名对象 Result com.gcy.bootwithutils.controller.BeanController.getNullProperty(Person)
+        //获取切点方法签名对象 Result com.gcy.bootwithutils.controller.BeanController.getNullProperty(StudentDto)
         Signature signature = joinPoint.getSignature();
         MethodSignature methodSignature = (MethodSignature) signature;
         Method method = methodSignature.getMethod();

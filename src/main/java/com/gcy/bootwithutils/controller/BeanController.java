@@ -6,11 +6,9 @@ import com.gcy.bootwithutils.common.constants.RedisLockTypeEnum;
 import com.gcy.bootwithutils.common.constants.Result;
 import com.gcy.bootwithutils.common.constants.ResultCode;
 import com.gcy.bootwithutils.common.exception.Exception400;
-import com.gcy.bootwithutils.common.exception.Exception401;
 import com.gcy.bootwithutils.controller.base.BaseController;
+import com.gcy.bootwithutils.model.vo.StudentVo;
 import com.gcy.bootwithutils.service.bean.BeanService;
-import com.gcy.bootwithutils.vo.House;
-import com.gcy.bootwithutils.vo.Person;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +27,8 @@ public class BeanController extends BaseController {
     @ApiOperation("返回对象中为null的属性")
     @GetMapping("/filterNullProperty")
     @ResponseBody
-    public Result<String []> getNullProperty(@RequestBody(required = true) @Valid Person person) throws Exception {
-        return Result.success(BeanService.getNullPropertyNames(person));
+    public Result<String []> getNullProperty(@RequestBody(required = true) @Valid StudentVo student) throws Exception {
+        return Result.success(BeanService.getNullPropertyNames(student));
     }
 
     /*
@@ -42,7 +40,7 @@ public class BeanController extends BaseController {
      */
     @DeleteMapping("/complicatedCors")
     @ResponseBody
-    public Result<String> testComplicatedCors(@RequestBody Person person){
+    public Result<String> testComplicatedCors(@RequestBody StudentVo person){
         return Result.success(person.toString());
     }
 

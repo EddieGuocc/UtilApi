@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gcy.bootwithutils.dao.StudentDao">
+    <resultMap id="baseStudentMap" type="com.gcy.bootwithutils.model.dto.StudentDto">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="age" property="age" />
+    </resultMap>
+
+    <select id="getStudentList" resultMap="baseStudentMap">
+        SELECT
+        id,
+        `name`,
+        age
+        FROM
+        student
+        <where>
+            <if test="id != null and id != ''">
+                AND id = #{id}
+            </if>
+            <if test="name != null and name != ''">
+                AND `name` REGEXP #{name}
+            </if>
+            <if test="age != null and age != ''">
+                AND age = #{age}
+            </if>
+        </where>
+    </select>
+</mapper>

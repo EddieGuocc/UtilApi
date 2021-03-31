@@ -4,6 +4,7 @@ import com.gcy.bootwithutils.common.dto.Pagination;
 import com.github.pagehelper.PageInfo;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.validation.BindingResult;
 
@@ -17,6 +18,7 @@ import org.springframework.validation.BindingResult;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class Result<T> {
 
     private int errCode;
