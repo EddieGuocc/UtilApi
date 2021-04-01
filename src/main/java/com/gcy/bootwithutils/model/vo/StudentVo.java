@@ -1,8 +1,6 @@
 package com.gcy.bootwithutils.model.vo;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * @ClassName StudentVo
@@ -12,6 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@NoArgsConstructor
 public class StudentVo {
 
     private Long id;
@@ -19,4 +18,9 @@ public class StudentVo {
     private String name;
 
     private Integer age;
+
+    public StudentVo(String name, Integer age) {
+        this.name = name;
+        this.age = age;
+    }
 }

@@ -5,7 +5,9 @@ import com.gcy.bootwithutils.service.date.DateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 @Service
 @Slf4j
@@ -35,4 +37,20 @@ public class FileService {
             e.printStackTrace();
         }
     }
+
+    public void exportFile(String fileName, String data, HttpServletResponse response) {
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentType("text/plain");
+        response.addHeader("Content-Disposition", "attachment;file=" + fileName + ".txt");
+
+        try (OutputStream outStr = response.getOutputStream();
+             BufferedOutputStream buff = new BufferedOutputStream(outStr)){
+            buff.write(data.getBytes(StandardCharsets.UTF_8));
+            buff.flush();
+            outStr.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

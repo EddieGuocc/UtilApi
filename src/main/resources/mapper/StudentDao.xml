@@ -26,4 +26,37 @@
             </if>
         </where>
     </select>
+
+    <select id="exportAllStudentWithStream" resultMap="baseStudentMap" resultSetType="FORWARD_ONLY" fetchSize="-2147483648">
+        SELECT
+            id,
+            `name`,
+            age
+        FROM
+            student
+    </select>
+
+    <!-- fetchSize mysql必须设置为Integer.MIN_VALUE resultSetType必须设置为FORWARD_ONLY  -->
+    <select id="exportAllStudent" resultMap="baseStudentMap" resultSetType="FORWARD_ONLY" fetchSize="-2147483648">
+        SELECT
+            id,
+            `name`,
+            age
+        FROM
+            student
+    </select>
+
+    <insert id="insertStudent">
+        INSERT INTO student (name, age) values
+        <foreach collection="list" item="item" separator =",">
+            (
+             #{item.name},
+             #{item.age}
+            )
+        </foreach>
+    </insert>
+
+
+
+
 </mapper>
