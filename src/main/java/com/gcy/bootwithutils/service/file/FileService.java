@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 public class FileService {
 
     public static void generateErrorLog(String exceptionType, String exceptionCause, String time){
-        String fileName = "./ErrorLog/"+ time + "ErrorLog.txt";
+        String fileName = "/User/eddieguo/log/ErrorLog/"+ time + "ErrorLog.txt";
         try{
 
             File file = new File(fileName);

@@ -4,7 +4,7 @@ spring:
   #===============Mysql database==================
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://100.8.0.89:3306/school?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&autoReconnect=true&rewriteBatchedStatements=true
+    url: jdbc:mysql://172.16.91.2:3306/goddb?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&autoReconnect=true&rewriteBatchedStatements=true
     username: eddie
     password: 1003
     initialSize: 5

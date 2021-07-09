@@ -7,7 +7,8 @@ public enum ResultCode {
 	UNCONNECTION(-8,"连接超时"),
 	UPDATE(-9,"下载最新版本"),
 	MISS_QEQUEST_BODY(-2,"传参方式不正确"),
-	OUT_OF_COUNT(-3, "访问太频繁")
+	OUT_OF_COUNT(-3, "访问太频繁"),
+	PARAMS_INVALID(4, "参数无法识别")
 	;
 
 	private int resultCode;
