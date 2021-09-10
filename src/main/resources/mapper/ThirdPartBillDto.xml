@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gcy.bootwithutils.dao.ThirdPartBillDao">
+    <resultMap id="baseMap" type="com.gcy.bootwithutils.model.dto.ThirdPartBillDto">
+        <id property="id" column="id" />
+        <result property="orderId" column="order_id" />
+        <result property="userId" column="user_id" />
+        <result property="productId" column="product_id" />
+        <result property="productName" column="product_name" />
+        <result property="createTime" column="create_time" />
+    </resultMap>
+
+    <select id="select" resultMap="baseMap">
+        select * from BILL_THIRD_PART_DETAILS
+    </select>
+
+    <insert id="insert">
+        INSERT INTO `goddb`.`BILL_THIRD_PART_DETAILS` (`product_id`, `order_id`, `product_name`, `create_time`, `user_id`)
+        VALUES (
+                #{productId},
+                #{orderId},
+                #{productName},
+                #{createTime},
+                #{userId}
+                )
+    </insert>
+</mapper>

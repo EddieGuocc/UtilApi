@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gcy.bootwithutils.dao.CIBNBillDao">
+    <resultMap id="baseMap" type="com.gcy.bootwithutils.model.dto.CIBNBillDto">
+        <id property="id" column="id" />
+        <result property="orderId" column="order_id" />
+        <result property="userId" column="user_id" />
+        <result property="price" column="price" />
+        <result property="createTime" column="create_time" />
+        <result property="productId" column="product_id" />
+        <result property="productName" column="product_name" />
+    </resultMap>
+
+    <insert id="insert">
+        INSERT INTO `goddb`.`BILL_CIBN_DETAILS` (`order_id`, `user_id`, `price`, `create_time`, `product_id`, `product_name`)
+        VALUES (
+                   #{orderId},
+                   #{userId},
+                   #{price},
+                   #{createTime},
+                   #{productId},
+                   #{productName}
+               )
+    </insert>
+
+    <select id="select" resultMap="baseMap" >
+        SELECT * FROM `goddb`.`BILL_CIBN_DETAILS`
+    </select>
+</mapper>

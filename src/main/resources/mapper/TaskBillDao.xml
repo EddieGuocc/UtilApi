@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gcy.bootwithutils.dao.TaskBillDao">
+    <resultMap id="baseMap" type="com.gcy.bootwithutils.model.dto.TaskBillDto">
+        <id property="taskId" column="task_id" />
+        <result property="createTime" column="create_time" />
+        <result property="className" column="class_name" />
+        <result property="methodName" column="method_name" />
+        <result property="dataLength" column="data_length" />
+    </resultMap>
+
+    <insert id="addTaskRecord" useGeneratedKeys="true" keyColumn="id" keyProperty="taskId">
+        INSERT INTO `BILL_TASK_RESULT` (`create_time`, `class_name`, `method_name`, `data_length`)
+        VALUES (#{createTime}, #{className}, #{methodName}, #{dataLength})
+    </insert>
+
+    <update id="updateTaskRecord">
+        UPDATE `BILL_TASK_RESULT` SET `status` = #{status}, finish_time = #{finishTime}, data_length = #{dataLength}  WHERE `task_id` = #{taskId} AND `status` = 0
+    </update>
+</mapper>
