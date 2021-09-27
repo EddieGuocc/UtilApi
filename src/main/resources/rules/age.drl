@@ -1,0 +1,17 @@
+package com.gcy.bootwithutils.rules
+import com.gcy.bootwithutils.model.dto.Person
+dialect "java"
+
+rule "adultcheck"
+    when
+        $p : Person(age >= 18)
+    then
+        System.out.println("adultCheck，监测到成人" + $p.getName() + "age:" + $p.getAge());
+end
+
+rule "childcheck"
+    when
+        $p : Person(age < 18)
+    then
+        System.out.println("childCheck，监测到未成年人" + $p.getName() + "age:" + $p.getAge());
+end

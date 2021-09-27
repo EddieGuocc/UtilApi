@@ -1,0 +1,18 @@
+package com.gcy.bootwithutils.rules
+dialect "java"
+import com.gcy.bootwithutils.model.dto.Person
+
+
+rule "malecheck"
+    when
+        $p : Person(gender == 'M')
+    then
+        System.out.println("maleCheck规则触发，监测到男性" + $p.getName() + "id:" + $p.getPersonId());
+end
+
+rule "femalecheck"
+  when
+        $p : Person(gender == 'F')
+    then
+        System.out.println("femaleCheck规则触发，监测到女性" + $p.getName() + "id:" + $p.getPersonId());
+end
