@@ -2,6 +2,7 @@ package com.gcy.bootwithutils.controller;
 
 
 import com.gcy.bootwithutils.model.dto.Person;
+import com.gcy.bootwithutils.service.json.JsonService;
 import com.gcy.bootwithutils.service.person.PersonService;
 import lombok.extern.slf4j.Slf4j;
 import org.kie.api.runtime.KieSession;
@@ -21,21 +22,25 @@ public class PersonController {
     private PersonService personService;
 
     @Autowired
+    private JsonService jsonService;
+
+    @Autowired
     private KieSession session;
 
 
     @GetMapping("/query")
-    public void selectPerson() {
-        Person p = new Person();
-        p.setAge(15);
-        p.setGender('M');
-        p.setName("haha");
-        p.setPersonId(123);
-        session.insert(p);
-        session.fireAllRules();
+    public List<Person> selectPerson() {
+
+
+        List<Person> result = personService.getPersonList();
+        for (Person p : result) {
+            session.setGlobal("jsonService", jsonService);
+            session.insert(p);
+            session.fireAllRules();
+        }
+        System.out.println("规则引擎返回数据为: " + session.getGlobal("jsonService").toString());
         // session.dispose();
-        // List<Person> result = personService.getPersonList();
-        // return result;
+        return result;
     }
 
 }

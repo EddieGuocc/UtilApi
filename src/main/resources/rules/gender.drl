@@ -1,18 +1,86 @@
 package com.gcy.bootwithutils.rules
 dialect "java"
+// 导入某个类
 import com.gcy.bootwithutils.model.dto.Person
+import java.util.List
+// 支持导入静态方法
+import com.gcy.bootwithutils.utils.DateUtil
+// 声明全局变量，可以是service，为规则引擎与java类进行数据传输提供了途径
+global com.gcy.bootwithutils.service.json.JsonService jsonService
 
+// 自定义方法，可供调用
+function String hello(String input) {
+    return "hello: " + input;
+}
 
-rule "malecheck"
+// 最基础的过滤
+rule "personCheck"
+    // 执行优先级
+    salience 99
+    // 规则开启/关闭
+    enabled true
     when
-        $p : Person(gender == 'M')
+        $p : Person()
     then
-        System.out.println("maleCheck规则触发，监测到男性" + $p.getName() + "id:" + $p.getPersonId());
+        System.out.println("personCheck规则出发，监测到人类");
+        System.out.println(jsonService.toJson($p));
 end
 
-rule "femalecheck"
+// 使用$p 进行赋值（绑定数据）；==相当于Object.equals()；matches匹配正则表达式
+rule "maleCheck"
+    salience 98
+    when
+        $p : Person(gender == 'M' && name matches "\\w+")
+    then
+        System.out.println("maleCheck规则触发，监测到男性" + $p.getName() + "id:" + $p.getPersonId());
+        System.out.println("规则文件内部定义的方法执行结果为：" + DateUtil.getDayList("2021-09-01", "2021-09-08"));
+end
+
+// contains数组、字符串包含目标值
+rule "femaleCheck"
+    salience 97
   when
-        $p : Person(gender == 'F')
+        $p : Person(gender == 'F' && name contains "c")
     then
         System.out.println("femaleCheck规则触发，监测到女性" + $p.getName() + "id:" + $p.getPersonId());
+        System.out.println("规则文件内部定义的方法执行结果为：" + hello($p.getName()));
+end
+
+// 同音词检查，震惊
+rule "pronunciationCheck"
+    salience 96
+    when
+        $p : Person(name soundslike "sun")
+    then
+        System.out.println("pronunciationCheck规则触发，检测到与sun同音词" + $p.getName());
+end
+
+// 集合操作
+rule "collectCheck"
+    salience 95
+    when
+        $size : List( size >= 2) from collect(Person())
+    then
+        System.out.println("person人数大于2, 长度为：" + $size.size());
+end
+
+// 计算平均数
+rule "ageCalculate"
+    salience 94
+    when
+        $avg : Number() from accumulate(Person($temp : age), average($temp))
+    then
+        System.out.println("ageCalculate 计算person平均年龄为，" + $avg);
+end
+
+// 计算平均数2 init声明初始化变量；action执行的动作；result返回结果
+rule "ageCalculate2"
+    salience 95
+    when
+        $avg : Number() from accumulate(Person($age : age),
+        init(double $total = 0; int $count = 0;),
+        action($total += $age; $count++;),
+        result($total / $count))
+    then
+        System.out.println("ageCalculate2 计算person平均年龄为，" + $avg);
 end
